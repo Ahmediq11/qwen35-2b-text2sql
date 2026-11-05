@@ -1,0 +1,22 @@
+{
+ "tag": "base",
+ "model": "/root/wsp/models/Qwen3.5-0.8B",
+ "n_problems": 10,
+ "samples": 1,
+ "acc": 0.0,
+ "cut_share": 1.0,
+ "mean_tokens": 32768.0,
+ "tokens_sum": 327680,
+ "mean_cut_tail_duplicate8": 0.7976025549056057,
+ "wall_s": 2172.692937850952,
+ "tok_per_s": 150.81744607874222,
+ "dtype": "float16",
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "presence_penalty": 1.5,
+  "max_tokens": 32768,
+  "seed": 0
+ }
+}

@@ -1,0 +1,6 @@
+﻿models/
+ref/
+data/*/
+.venv/
+*.safetensors
+__pycache__/
