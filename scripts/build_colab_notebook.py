@@ -61,8 +61,9 @@ md("## 1. Install (vLLM 0.33.0 / transformers 5.20.2, the versions tested locall
 code(r"""
 !pip install -q "vllm==0.33.0" "transformers==5.20.2" "math-verify[antlr4_13_2]" datasets
 import vllm, transformers, torch
+# is_bf16_supported() is True on a T4 too (emulated); vLLM needs native bf16, i.e. compute capability >= 8.0
 print(vllm.__version__, transformers.__version__, torch.__version__, torch.cuda.get_device_name(0),
-      "bf16" if torch.cuda.is_bf16_supported() else "fp16 only")
+      "bf16" if torch.cuda.get_device_capability(0)[0] >= 8 else "fp16 only (no native bf16)")
 """)
 
 md(r"""
@@ -139,7 +140,8 @@ Each model runs in its own process, so GPU memory is freed between runs. A model
 """)
 code(r"""
 import torch
-DTYPE = "bfloat16" if torch.cuda.is_bf16_supported() else "float16"
+DTYPE = "bfloat16" if torch.cuda.get_device_capability(0)[0] >= 8 else "float16"   # T4 (7.5) -> float16
+print("dtype:", DTYPE)
 os.environ["VLLM_LOGGING_LEVEL"] = "WARNING"
 
 def run(tag, model):
