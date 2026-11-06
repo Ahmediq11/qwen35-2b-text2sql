@@ -86,7 +86,9 @@ def main():
     ap.add_argument("--heldout", type=int, default=300)
     ap.add_argument("--eval-every", type=int, default=150)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--base", default=BASE, help="model dir to start from (e.g. the merged v1 model for round 2)")
     a = ap.parse_args()
+    base_dir = os.path.abspath(a.base)
     from peft import LoraConfig, get_peft_model
     from transformers import AutoModelForImageTextToText, AutoTokenizer
     torch.manual_seed(a.seed)
@@ -103,10 +105,10 @@ def main():
         held_db.add(d)
         held += [r for r in rows if r["db_id"] == d]
     train = [r for r in rows if r["db_id"] not in held_db]
-    tok = AutoTokenizer.from_pretrained(BASE)
+    tok = AutoTokenizer.from_pretrained(base_dir)
     enc_tr, enc_ho = encode(tok, train), encode(tok, held)
 
-    m = AutoModelForImageTextToText.from_pretrained(BASE, dtype=torch.bfloat16).to("cuda")
+    m = AutoModelForImageTextToText.from_pretrained(base_dir, dtype=torch.bfloat16).to("cuda")
     m.config.use_cache = False
     m.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     m.enable_input_require_grads()
@@ -174,7 +176,7 @@ def main():
     # merge and write a vLLM-loadable checkpoint: base file with the merged language-model tensors replaced
     merged = m.merge_and_unload()
     sd = {k: v for k, v in merged.state_dict().items()}
-    base = ED.load(os.path.join(BASE, ST))
+    base = ED.load(os.path.join(base_dir, ST))
     changed = 0
     for name in list(base):
         if name in sd and ".layers." in name and "language_model" in name:
@@ -186,7 +188,7 @@ def main():
     assert changed > 0, "no tensor changed after merge"
     mdir = os.path.join(ROOT, "models/lora", os.path.basename(os.path.normpath(a.out)))
     os.makedirs(mdir, exist_ok=True)
-    for f in os.listdir(BASE):
+    for f in os.listdir(BASE):            # tokenizer/config files always come from the original base model
         if f != ST and not os.path.exists(os.path.join(mdir, f)):
             os.symlink(os.path.join(BASE, f), os.path.join(mdir, f))
     ED.save(os.path.join(mdir, ST), base, metadata={"format": "pt"})
