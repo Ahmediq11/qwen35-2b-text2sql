@@ -153,3 +153,20 @@ scoring. Confirm split, 512 questions, LoRA v1 model:
 Paired with the base run: vote@8 +2.1 ± 2.0; **vote@8 + repair +5.3 ± 2.1 (71 rescues / 44 losses)** while using 28%
 fewer generated tokens than one base thinking answer. Repair: 1,350 tried, 419 ran. The 13-point gap to the oracle says
 a better selector (not more samples) is the next lever. Locked test sets not run for this method yet.
+
+## 2026-11-06 · Phase 4.4 — Test sets (run once): LoRA v1 + 8 samples + execution repair + vote
+`results/p4_lora/lora_synsql10k_vote8_repair`. Two infrastructure failures first: a SQLite query hung a Pool worker
+for 20+ min (generations lost, ~45 min of GPU) and a leftover vLLM EngineCore kept 92 GB after the kill. Fixes:
+`safe_map` (hard per-chunk wall-clock limit, pool replaced on a hang), generations saved before scoring,
+`--from-saved` rescoring on CPU, gold results computed once per question. Final scoring: no task hit the limit.
+| model / method | BIRD dev | (tuning split) | (mini-dev part) | Spider dev | tokens/question |
+|---|---|---|---|---|---|
+| Qwen3.5-2B no thinking | 22.24% | 24.15% | 18.27% | 46.62% | ~80 |
+| Qwen3.5-2B thinking, 1 sample | 33.46% | 36.91% | 26.31% | 64.12% | ~9,600 |
+| LoRA v1, 1 sample | 25.51% | 28.31% | 19.68% | 60.15% | ~480 |
+| LoRA v1, vote@8 | 39.40% | 42.13% | 33.73% | 69.25% | |
+| **LoRA v1, vote@8 + repair** | **40.83%** | 44.06% | 34.14% | **68.57%** | **4,916** |
+| XiYan-3B (reference) | 52.19% | 54.20% | 47.99% | 85.20% | ~45 |
+Net: +7.4 points on BIRD dev and +4.5 on Spider dev over the base model with thinking, at about half the generated
+tokens. Repair helps more on BIRD (+1.4 on top of voting) than on Spider (−0.7). Oracle pass@8+repair 66.1%: the
+selector, not the number of samples, is the main remaining gap. Still well below XiYan-3B (trained on BIRD/Spider).

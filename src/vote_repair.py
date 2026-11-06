@@ -39,15 +39,49 @@ def run_sql(args):
         return {"ok": False, "err": str(e)[:300], "sig": None}
 
 
+def gold_of(args):
+    db, gold = args
+    try:
+        return E.gold_result(db, gold)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def is_correct(args):
-    db, sql, gold = args
-    if sql is None:
+    db, sql, g = args          # g = (gold rows, ordered) computed once in the parent, or None (gold_error)
+    if sql is None or g is None:
         return False
     try:
-        g, ordered = E.gold_result(db, gold)
-        return E.results_match(E.execute(db, sql, timeout_s=10.0), g, ordered)
+        return E.results_match(E.execute(db, sql, timeout_s=10.0), g[0], g[1])
     except Exception:  # noqa: BLE001
         return False
+
+
+def safe_map(fn, args, fallback, timeout=60, procs=32):
+    """Pool map with a hard wall-clock limit per chunk: tasks are run in chunks of procs*8; a task still running
+    `timeout` seconds after its chunk started (e.g. a SQLite query the progress handler cannot interrupt) gets
+    `fallback`, and the pool is then replaced so the stuck worker is killed."""
+    out, hung, pool = [], 0, Pool(procs)
+    try:
+        step = procs * 8
+        for c in range(0, len(args), step):
+            jobs = [pool.apply_async(fn, (x,)) for x in args[c:c + step]]
+            start, bad = time.time(), 0
+            for jb in jobs:
+                try:
+                    out.append(jb.get(timeout=max(0.1, timeout - (time.time() - start))))
+                except Exception:  # noqa: BLE001  (TimeoutError or a worker error)
+                    out.append(fallback)
+                    bad += 1
+            if bad:
+                hung += bad
+                pool.terminate()
+                pool = Pool(procs)
+        if hung:
+            print(f"safe_map {fn.__name__}: {hung} task(s) hit the hard limit", flush=True)
+        return out
+    finally:
+        pool.terminate()
 
 
 def vote(cands):
@@ -70,6 +104,7 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=4096)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--from-saved", action="store_true", help="rescore from <out>/gen0.json + repair.json (no GPU)")
     a = ap.parse_args()
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
@@ -83,16 +118,25 @@ def main():
     sp = dict(temperature=0.6, top_p=0.95, top_k=20, presence_penalty=1.5, max_tokens=a.max_tokens, seed=a.seed)
     max_prompt = max(len(tok(p).input_ids) for p in prompts)
     # room for the repair turn: original prompt + previous answer (~answer part) + error message + new answer
-    llm = LLM(model=a.path, dtype="bfloat16", gpu_memory_utilization=0.9, seed=a.seed,
+    saved = a.from_saved
+    llm = None if saved else LLM(model=a.path, dtype="bfloat16", gpu_memory_utilization=0.9, seed=a.seed,
               max_model_len=max_prompt + 2 * a.max_tokens + 1024,
               limit_mm_per_prompt={"image": 0, "video": 0})
+    os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
-    outs = llm.generate(prompts, SamplingParams(n=a.n, **sp))
-    gen_tokens = sum(len(s.token_ids) for o in outs for s in o.outputs)
-    texts = [[s.text for s in o.outputs] for o in outs]
+    if saved:
+        g0 = json.load(open(os.path.join(a.out, "gen0.json")))
+        assert g0["ids"] == [it["id"] for it in items]
+        texts = g0["texts"]
+        gen_tokens = g0.get("gen_tokens") or sum(len(tok(t).input_ids) for ts in texts for t in ts)
+    else:
+        outs = llm.generate(prompts, SamplingParams(n=a.n, **sp))
+        gen_tokens = sum(len(s.token_ids) for o in outs for s in o.outputs)
+        texts = [[s.text for s in o.outputs] for o in outs]
+    json.dump({"ids": [it["id"] for it in items], "texts": texts, "gen_tokens": gen_tokens}, open(os.path.join(a.out, "gen0.json"), "w"))
     sqls = [[E.extract_sql(t, thinking=True)[0] for t in ts] for ts in texts]
-    with Pool(32) as pool:
-        ex = pool.map(run_sql, [(it["db_path"], s) for it, ss in zip(items, sqls) for s in ss], chunksize=8)
+    fail = {"ok": False, "err": "query did not finish (hard limit)", "sig": None}
+    ex = safe_map(run_sql, [(it["db_path"], s) for it, ss in zip(items, sqls) for s in ss], fail)
     ex = [ex[i * a.n:(i + 1) * a.n] for i in range(len(items))]
 
     # one repair round for every sample whose SQL did not run (cut answers included: they have no SQL)
@@ -109,14 +153,24 @@ def main():
     lim = max_prompt + 2 * a.max_tokens + 1024 - a.max_tokens
     keep_r = [k for k, p in enumerate(rep_prompts) if len(tok(p).input_ids) <= lim]
     rep_idx, rep_prompts = [rep_idx[k] for k in keep_r], [rep_prompts[k] for k in keep_r]
-    rep_out = llm.generate(rep_prompts, SamplingParams(n=1, **sp)) if rep_prompts else []
-    gen_tokens += sum(len(o.outputs[0].token_ids) for o in rep_out)
+    if saved:
+        rj = json.load(open(os.path.join(a.out, "repair.json")))
+        rep_idx = [tuple(x) for x in rj["rep_idx"]]     # the saved run's repair set is the record
+        rep_texts = rj["texts"]
+        gen_tokens += rj.get("gen_tokens") or sum(len(tok(t).input_ids) for t in rep_texts)
+    else:
+        rep_out = llm.generate(rep_prompts, SamplingParams(n=1, **sp)) if rep_prompts else []
+        rep_texts = [o.outputs[0].text for o in rep_out]
+        rep_tok = sum(len(o.outputs[0].token_ids) for o in rep_out)
+        gen_tokens += rep_tok
+        json.dump({"rep_idx": rep_idx, "texts": rep_texts, "gen_tokens": rep_tok},
+                  open(os.path.join(a.out, "repair.json"), "w"))
     wall = time.time() - t0
+    del llm                    # free the GPU before the CPU-only scoring
     sqls_r = [list(ss) for ss in sqls]
     ex_r = [list(xs) for xs in ex]
-    rep_sql = [E.extract_sql(o.outputs[0].text, thinking=True)[0] for o in rep_out]
-    with Pool(32) as pool:
-        rep_ex = pool.map(run_sql, [(items[i]["db_path"], s) for (i, _), s in zip(rep_idx, rep_sql)], chunksize=8)
+    rep_sql = [E.extract_sql(t, thinking=True)[0] for t in rep_texts]
+    rep_ex = safe_map(run_sql, [(items[i]["db_path"], s) for (i, _), s in zip(rep_idx, rep_sql)], fail)
     for (i, j), s, x in zip(rep_idx, rep_sql, rep_ex):
         if x["ok"]:
             sqls_r[i][j], ex_r[i][j] = s, x
@@ -124,19 +178,11 @@ def main():
     choices = {"sample0": [ss[0] for ss in sqls], "sample0+repair": [ss[0] for ss in sqls_r],
                f"vote@{a.n}": [vote(list(zip(ss, xs))) for ss, xs in zip(sqls, ex)],
                f"vote@{a.n}+repair": [vote(list(zip(ss, xs))) for ss, xs in zip(sqls_r, ex_r)]}
-    with Pool(32) as pool:
-        corr = {k: pool.map(is_correct, [(it["db_path"], s, it["gold_sql"]) for it, s in zip(items, v)])
-                for k, v in choices.items()}
-        allc = pool.map(is_correct, [(it["db_path"], s, it["gold_sql"]) for it, ss in zip(items, sqls_r) for s in ss],
-                        chunksize=8)
-    # drop items whose gold query fails (same rule as score.py)
-    good = []
-    for i, it in enumerate(items):
-        try:
-            E.gold_result(it["db_path"], it["gold_sql"])
-            good.append(i)
-        except Exception:  # noqa: BLE001
-            pass
+    golds = safe_map(gold_of, [(it["db_path"], it["gold_sql"]) for it in items], None, timeout=330)
+    corr = {k: safe_map(is_correct, [(it["db_path"], s, g) for it, s, g in zip(items, v, golds)], False)
+            for k, v in choices.items()}
+    allc = safe_map(is_correct, [(it["db_path"], s, g) for it, ss, g in zip(items, sqls_r, golds) for s in ss], False)
+    good = [i for i, g in enumerate(golds) if g is not None]   # gold_error items dropped, as in score.py
     n = len(good)
     res = {k: sum(v[i] for i in good) / n for k, v in corr.items()}
     res[f"oracle_pass@{a.n}+repair"] = sum(any(allc[i * a.n:(i + 1) * a.n]) for i in good) / n
@@ -146,7 +192,6 @@ def main():
     summary = {"n": n, "samples": a.n, "EX": res, "by_source": by_src, "repairs_tried": len(rep_prompts),
                "repairs_ran": sum(x["ok"] for x in rep_ex), "gen_tokens": gen_tokens,
                "tokens_per_question": gen_tokens / len(items), "wall_s": wall, "path": a.path, "ids": a.ids}
-    os.makedirs(a.out, exist_ok=True)
     json.dump(summary, open(os.path.join(a.out, "summary.json"), "w"), indent=1)
     with open(os.path.join(a.out, "per_item.jsonl"), "w") as f:
         for i, it in enumerate(items):
