@@ -1,0 +1,26 @@
+{
+ "model": "xiyan-3b",
+ "repo": "XGenerationLab/XiYanSQL-QwenCoder-3B-2504",
+ "revision": "b883e58ed83f74bab037d6a7b90c4b8706d357d7",
+ "family": "xiyan",
+ "profile": "xiyan",
+ "thinking": null,
+ "sampling": {
+  "temperature": 0.1,
+  "top_p": 0.8,
+  "max_tokens": 1024,
+  "seed": 0
+ },
+ "samples": 1,
+ "dataset": "bird_dev,spider_dev",
+ "n_items": 2568,
+ "dtype": "bfloat16",
+ "max_model_len": 6599,
+ "max_prompt_tokens": 5511,
+ "mean_prompt_tokens": 1965.23753894081,
+ "instruction": "Write one SQLite query that answers the question. Put the final query in a ```sql code block.",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+ "wall_s": 216.24565839767456,
+ "gen_tokens": 107528,
+ "tok_per_s": 497.24928951986914
+}

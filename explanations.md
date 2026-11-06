@@ -64,3 +64,17 @@ columns/tables (`schema_hallucination`). With thinking on, 27 of 32 base 0.8B fa
 edit removes them: the math edit transfers to SQL. A full-matrix estimate is several GPU-hours, mostly the base 0.8B
 thinking run (answers average 22.8k tokens because it loops to the limit).
 Next: ask the user before the full matrix (> 3 GPU-hours).
+
+## 2026-11-06 · Phase 1.3 — XiYan-7B / XiYan-3B baselines (BIRD dev + Spider dev)
+Model-card protocol (1 sample, temperature 0.1, DDL schema). BIRD dev: 7B 55.84% (card DDL 57.43%), 3B 52.19% (card
+52.09%). Spider dev: 7B 92.07%, 3B 85.20% (likely training contamination). Tuning split = BIRD dev minus the mini-dev
+questions (1,035 items, `data/bird_dev_tune_ids.json`); failure details are read only there. XiYan fails on logic, not
+loops (0–1 cut), so weight editing on XiYan is parked. Goal changed to Qwen3.5-2B, to be published on GitHub/HF.
+
+## 2026-11-06 · Phase 1.4 — Qwen3.5-2B baseline (BIRD dev + Spider dev, 1 sample)
+Generic prompt (DDL + 3 rows), Qwen sampling profiles. Thinking off: BIRD dev 22.24%, Spider dev 46.62%; most failures
+are made-up columns/tables (279) and joins (219) on the tuning split. Thinking on: BIRD dev 33.46%, Spider dev 64.12%,
+tuning split 36.91%. **211 of 1,035 tuning items (20%) are cut at 32,768 tokens; that is 32% of all tuning failures**,
+above the PLAN's 30% threshold for Track A (loops). Mean answer length 9.6k tokens. GPU time: 0.02 h off, 1.09 h on.
+Next (GATE 1): Track A on 2B thinking — test the MIT-style edit recipe for a 2B repetition direction; LoRA distillation
+as the comparison.

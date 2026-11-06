@@ -1,0 +1,65 @@
+{
+ "config": {
+  "model": "qwen35-2b",
+  "profile": "think",
+  "dataset": "bird_dev,spider_dev",
+  "samples": 1,
+  "sampling": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20,
+   "presence_penalty": 1.5,
+   "max_tokens": 32768,
+   "seed": 0
+  },
+  "dtype": "bfloat16"
+ },
+ "gold_errors": 1,
+ "n": 2567,
+ "EX": 0.45812232177639267,
+ "cut_share": 0.13790416828983248,
+ "no_sql": 0.0,
+ "syntax_error": 0.022984028048305415,
+ "exec_error": 0.10050642773665758,
+ "timeout": 0.0007791195948578107,
+ "wrong_result": 0.28048305414881186,
+ "outcomes": {
+  "cut": 354,
+  "syntax_error": 59,
+  "correct": 1176,
+  "exec_error": 256,
+  "wrong_result": 720,
+  "timeout": 2
+ },
+ "mean_tokens": 6688.169848071679,
+ "median_tokens": 1475,
+ "mean_cut_tail_duplicate8": 0.8484623491050927,
+ "failure_taxonomy": {
+  "loop/cut": 354,
+  "other": 332,
+  "schema_hallucination": 232,
+  "join_logic": 214,
+  "filter_value": 142,
+  "aggregation/grouping": 96,
+  "dialect": 17,
+  "no_sql/format": 4
+ },
+ "failure_taxonomy_share": {
+  "loop/cut": 0.2544931703810209,
+  "other": 0.23867721063982747,
+  "schema_hallucination": 0.1667864845434939,
+  "join_logic": 0.15384615384615385,
+  "filter_value": 0.10208483105679367,
+  "aggregation/grouping": 0.06901509705248023,
+  "dialect": 0.012221423436376708,
+  "no_sql/format": 0.002875629043853343
+ },
+ "EX_by_difficulty": {
+  "simple": 0.43135135135135133,
+  "moderate": 0.20474137931034483,
+  "challenging": 0.13194444444444445,
+  "all": 0.6411992263056093
+ },
+ "gpu_hours": 1.0880556837717692,
+ "tok_per_s": 4383.642577637326
+}
