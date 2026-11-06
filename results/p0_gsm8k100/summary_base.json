@@ -1,0 +1,22 @@
+{
+ "tag": "base",
+ "model": "models/Qwen3.5-0.8B",
+ "n_problems": 100,
+ "samples": 1,
+ "acc": 0.1,
+ "cut_share": 0.89,
+ "mean_tokens": 29660.66,
+ "tokens_sum": 2966066,
+ "mean_cut_tail_duplicate8": 0.8504363932283477,
+ "wall_s": 685.005030632019,
+ "tok_per_s": 4329.991558256678,
+ "dtype": "bfloat16",
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "presence_penalty": 1.5,
+  "max_tokens": 32768,
+  "seed": 0
+ }
+}

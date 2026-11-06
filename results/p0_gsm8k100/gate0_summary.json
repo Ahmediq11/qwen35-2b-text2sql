@@ -1,0 +1,46 @@
+{
+ "table": {
+  "base": {
+   "acc": 0.1,
+   "cut_share": 0.89,
+   "think_closed": 0.11,
+   "mean_tokens": 29661,
+   "median_correct_tokens": 4247,
+   "cut_tail_dup8": 0.8504363932283477,
+   "fail_cut": 89,
+   "fail_finished_wrong": 1,
+   "fail_finished_no_box": 0,
+   "gpu_hours": 0.19027917517556084,
+   "tok_per_s": 4330,
+   "dtype": "bfloat16"
+  },
+  "edited": {
+   "acc": 0.68,
+   "cut_share": 0.04,
+   "think_closed": 0.96,
+   "mean_tokens": 11783,
+   "median_correct_tokens": 8370,
+   "cut_tail_dup8": 0.0,
+   "fail_cut": 4,
+   "fail_finished_wrong": 21,
+   "fail_finished_no_box": 7,
+   "gpu_hours": 0.09207266489664713,
+   "tok_per_s": 3555,
+   "dtype": "bfloat16"
+  }
+ },
+ "gate0": {
+  "n": 100,
+  "acc_base": 0.1,
+  "acc_edited": 0.68,
+  "gain": 0.5800000000000001,
+  "rescues": 58,
+  "losses": 0,
+  "rescues_where_base_was_cut": 58,
+  "paper_gsm8k_acc": {
+   "unedited": 0.138,
+   "edited_p50c": 0.671
+  },
+  "gpu_hours_total": 0.282351840072208
+ }
+}

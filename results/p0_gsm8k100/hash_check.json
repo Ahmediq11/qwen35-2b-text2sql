@@ -1,0 +1,18 @@
+[
+ {
+  "name": "model.language_model.layers.15.mlp.down_proj.weight",
+  "base_ok": true,
+  "edited_ok": true,
+  "changed_entries": 65260,
+  "changed_columns": 64,
+  "edited_sha256": "82e2d733ea64feaeb4af93a1e065641d3df98b494a8b7576ef2f52e90fe2ee53"
+ },
+ {
+  "name": "model.language_model.layers.19.mlp.down_proj.weight",
+  "base_ok": true,
+  "edited_ok": true,
+  "changed_entries": 64928,
+  "changed_columns": 64,
+  "edited_sha256": "8ef3c61bc36af113ad58e89dbb0a4a14dcba5a45cb750c15ab515c82ddd12eb2"
+ }
+]

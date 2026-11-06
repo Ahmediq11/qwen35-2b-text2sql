@@ -26,3 +26,18 @@ of MATH-500 cut). Speed is the problem: 327,680 tokens took 36 minutes (151 toke
 cache only fits about 10 at a time on 8 GB, so bigger batches will not help much. A full 100-problem base vs edited
 run is roughly 5M tokens, or several GPU-hours on this card.
 Next: decide with the user how to run the rest of the GSM8K check (see the GATE 0 note).
+
+## 2026-11-06 · Phase 0.4 — 100 GSM8K test problems, base vs edited (GATE 0)
+The free Colab session ran out, so we moved to a rented Vast.ai box (RTX PRO 6000 Blackwell, 96 GB, bf16 like the
+paper). `scripts/remote_phase0.sh` installed vLLM 0.33.0, downloaded both models at the pinned revisions and checked the
+edit again on the box: the public edited checkpoint differs from the base in exactly layers 15/19 `mlp.down_proj`, and
+those tensors equal our rebuild of p50c. Then the first 100 GSM8K test problems, 1 sample each, thinking on, the
+paper's sampling. Result: **base 10% → edited 68%** (paper: 13.8% → 67.1%). The share of answers cut at 32,768 tokens
+fell from **89% to 4%**, and the share that closed `</think>` rose from 11% to 96%. Paired: **58 rescues, 0 losses**, and
+all 58 rescues were problems where the base model had run into the token limit. Base cut answers end in loops (duplicated
+8-gram share 0.85). The edited model's 4 cut answers have no repeated word 8-grams in their tail (whitespace or
+non-word degeneration, as the paper also saw). The edited model's remaining failures are mostly finished-but-wrong (21)
+and finished without `\boxed{}` (7). So, as in the paper, the edit mostly lets the model stop looping and finish;
+correct answers get longer (median 4,247 → 8,370 tokens) because the model now finishes long reasoning it used to
+abandon in a loop. GPU time 0.28 h (11.4 min base, 5.5 min edited).
+Next: GATE 0 passes; Phase 1 (SQL harness and baselines).
