@@ -21,6 +21,8 @@ MODELS = {   # key: (local dir, family, HF repo, revision)
     "qwen35-2b": ("models/Qwen3.5-2B", "qwen", "Qwen/Qwen3.5-2B", "15852e8c16360a2fea060d615a32b45270f8a8fc"),
     "xiyan-3b": ("models/XiYanSQL-QwenCoder-3B-2504", "xiyan", "XGenerationLab/XiYanSQL-QwenCoder-3B-2504",
                  "b883e58ed83f74bab037d6a7b90c4b8706d357d7"),
+    "xiyan-7b": ("models/XiYanSQL-QwenCoder-7B-2504", "xiyan", "XGenerationLab/XiYanSQL-QwenCoder-7B-2504",
+                 "afe320fcaf18bee342174b4e35e5a481ae93719f"),
 }
 PROFILES = {
     # Qwen3.5 thinking: the paper's evaluation sampling (model card thinking setting), 32,768 new tokens

@@ -45,6 +45,9 @@ def load_bird(data_root, split):
     if split == "minidev":
         root = os.path.join(data_root, "bird_minidev")
         raw = json.load(open(_find(root, "mini_dev_sqlite.json"), encoding="utf-8"))
+    elif split == "dev":     # the full BIRD dev set (1,534), on which XiYan's numbers are published
+        root = os.path.join(data_root, "bird_dev")
+        raw = json.load(open(_find(root, "dev.json"), encoding="utf-8"))
     else:
         root = os.path.join(data_root, "bird_train")
         raw = json.load(open(_find(root, "train.json"), encoding="utf-8"))
