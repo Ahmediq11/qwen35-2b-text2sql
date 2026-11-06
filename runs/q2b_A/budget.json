@@ -1,6 +1,6 @@
 {
  "limit": 50,
- "used": 8,
+ "used": 11,
  "log": [
   {
    "type": "generate",
@@ -133,6 +133,63 @@
    "ok": true,
    "time": "2026-11-06T06:46:00",
    "pass": 8
+  },
+  {
+   "type": "generate",
+   "state": "original",
+   "ids": "runs/q2b_A/ids_c1_confirm512.json",
+   "n": 512,
+   "samples": 1,
+   "profile": "think",
+   "tag": "c1_orig",
+   "result": {
+    "n": 512,
+    "EX": 0.478515625,
+    "cut_share": 0.140625,
+    "mean_tokens": 7197.927734375,
+    "gpu_hours": 0.235584619641304
+   },
+   "ok": true,
+   "time": "2026-11-06T07:14:34",
+   "pass": 9
+  },
+  {
+   "type": "generate",
+   "state": "edits/q2b_L15L19_k64_a6",
+   "ids": "runs/q2b_A/ids_c1_confirm512.json",
+   "n": 512,
+   "samples": 1,
+   "profile": "think",
+   "tag": "c1_a6",
+   "result": {
+    "n": 512,
+    "EX": 0.501953125,
+    "cut_share": 0.0390625,
+    "mean_tokens": 5159.91015625,
+    "gpu_hours": 0.15616025023990207
+   },
+   "ok": true,
+   "time": "2026-11-06T07:32:00",
+   "pass": 10
+  },
+  {
+   "type": "generate",
+   "state": "edits/q2b_rand_L15L19_k64_a6",
+   "ids": "runs/q2b_A/ids_g1_bird256.json",
+   "n": 256,
+   "samples": 1,
+   "profile": "think",
+   "tag": "g1_rand_a6",
+   "result": {
+    "n": 245,
+    "EX": 0.3673469387755102,
+    "cut_share": 0.19183673469387755,
+    "mean_tokens": 9073.926530612245,
+    "gpu_hours": 0.15458165095912085
+   },
+   "ok": true,
+   "time": "2026-11-06T07:46:11",
+   "pass": 11
   }
  ]
 }

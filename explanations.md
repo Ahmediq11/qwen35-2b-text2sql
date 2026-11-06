@@ -101,3 +101,26 @@ analysis: `src/contrast.py` (contrast texts), `src/edit_build.py` (directions, w
   (within sampling noise of one sample, but in the wrong direction). Practical upside of α=6: same accuracy with 29%
   fewer generated tokens and 4× fewer cut-offs.
 Next: GATE decision (freeze α=6 as an efficiency edit and confirm, and/or go to Phase 4 LoRA distillation).
+
+## 2026-11-06 · GATE 2 — Track A frozen edit (passes 9–11 of 50)
+Frozen before confirmation: `edits/q2b_L15L19_k64_a6` (`FROZEN.json`, edit.npz sha256 6223a242…). Layers 15 and 19
+`mlp.down_proj`, 64 columns each, α=6, ~259k weights changed (rel. change 5.2% / 6.0%).
+- Confirmation, 512 confirm-split practice items (databases never used in discovery), 1 sample, paired: original EX
+  47.9%, cut 14.1%, 7,198 mean tokens → edited EX 50.2%, cut 3.9%, 5,160 tokens. Gain +2.3 ± 1.8 (48 rescues / 36
+  losses): not significant.
+- Random control in generation (norm-matched orthogonal direction, same columns, 256 discover items): EX 37.0%, cut
+  18.5% (original 16.8%), 8,879 tokens. The targeted direction removes loops; a same-size random edit does not.
+- Mechanism story: Qwen3.5-2B has a repetition direction in the residual stream (held-out AUC ≈ 1.0) written by a few
+  MLP neurons; removing it from 64 writer columns in two layers stops the loops. Unlike GSM8K on 0.8B, SQL loops
+  happen on questions the model cannot solve, so stopping them mostly turns a cut-off into a finished wrong answer.
+  Net: ~28% fewer generated tokens and ~4× fewer cut-offs, with accuracy unchanged within noise (+2.3 ± 1.8 confirm,
+  −0.4 ± 2.5 discover). Kept as an efficiency edit; locked test sets not run yet.
+
+## 2026-11-06 · Phase 4 start — LoRA SFT data (SynSQL-2.5M CoT)
+`src/sft_data.py`: streamed SynSQL-2.5M (Apache-2.0, 2.08M items read), stratified sample of 20,000 (Simple 4k,
+Moderate 7k, Complex 6k, Highly Complex 3k) over 8,518 synthetic databases. Prompt = our evaluation prompt (DDL + 3
+rows, question, evidence, instruction) with thinking on; target = the CoT inside <think>, then the ```sql answer.
+Kept only SQL that runs within 5 s and returns ≥ 1 row (21,011 dropped). Decontamination against Spider dev / BIRD dev /
+mini-dev: 0 question matches, 0 shared database names. Mean prompt 2,927 tokens, mean target 705 tokens.
+First run: 10k examples, LoRA r=16/α=32 on q/k/v/o, linear-attention in/out projections and MLP of all 24 layers
+(15.6M trainable params), lr 1e-4 cosine, 1 epoch; measured 3.5k tokens/s → ~2.8 GPU-hours.

@@ -1,0 +1,17 @@
+{
+ "edit": "edits/q2b_L15L19_k64_a6",
+ "frozen_before": "confirmation passes 9-11",
+ "tensors": [
+  {
+   "name": "model.language_model.layers.15.mlp.down_proj.weight",
+   "base_sha256": "2a0740d602e774068b1b7ce94acf7040568951e6320d053cfb39beaf7013dd12",
+   "edited_sha256": "8ead6fb393bf553b4ec9e4b61ab9928883768f46ff55200df57ee0a9af99341d"
+  },
+  {
+   "name": "model.language_model.layers.19.mlp.down_proj.weight",
+   "base_sha256": "f97bad6786f6754457e242349c05202372833b3683acfde66ad2a8cc0dfd58bc",
+   "edited_sha256": "2f55ce1bc177324efa6b2751cdfc6d9b93dc7310231e1afe821af5aac3de4d05"
+  }
+ ],
+ "edit_npz_sha256": "6223a242de8e20d78b9480a3ad89b32cc4d084c7070f750c27474bf13dd6e1c3"
+}
