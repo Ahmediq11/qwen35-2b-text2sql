@@ -170,3 +170,15 @@ for 20+ min (generations lost, ~45 min of GPU) and a leftover vLLM EngineCore ke
 Net: +7.4 points on BIRD dev and +4.5 on Spider dev over the base model with thinking, at about half the generated
 tokens. Repair helps more on BIRD (+1.4 on top of voting) than on Spider (−0.7). Oracle pass@8+repair 66.1%: the
 selector, not the number of samples, is the main remaining gap. Still well below XiYan-3B (trained on BIRD/Spider).
+
+## 2026-11-06 · Phase 4.5 — Round 2: rejection-sampled self-distillation on BIRD train (discover split)
+LoRA v1 sampled 4 answers for each of the 5,026 BIRD train questions in the discover split (thinking on). 2,349
+questions (46.7%) had at least one execution-correct sample; the shortest correct one (mean 429 tokens) became the
+target (`src/r2_data.py`), mixed with 3,000 unseen SynSQL rows. A new LoRA (same config, lr 5e-5, 1 epoch, 343 steps)
+was trained on top of the merged v1 model (`--base`); held-out loss 0.253 (v1: 0.301). Rule fixed before seeing
+results: run the test sets only if confirm vote@8+repair beats v1's 53.125%.
+- Confirm split (512): vote@8+repair **54.9%** (v1 53.1%, base 47.9%); BIRD part 45.3% (v1 43.0%); sample 0 41.6%
+  (v1 38.5%); oracle 67.8%. Rule passed → test sets run once.
+- Test sets: BIRD dev **42.07%** (v1 40.83%, base thinking 33.46%) — tuning split 45.51%, mini-dev part 34.94%;
+  Spider dev **72.44%** (v1 68.57%, base 64.12%); single sample BIRD dev 29.09% (v1 25.51%); 4,660 tokens/question.
+  Training on the model's own execution-verified answers on real BIRD databases closes part of the domain gap.

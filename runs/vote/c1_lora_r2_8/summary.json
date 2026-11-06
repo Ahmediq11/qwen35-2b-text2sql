@@ -1,0 +1,32 @@
+{
+ "n": 512,
+ "samples": 8,
+ "EX": {
+  "sample0": 0.416015625,
+  "sample0+repair": 0.443359375,
+  "vote@8": 0.53125,
+  "vote@8+repair": 0.548828125,
+  "oracle_pass@8+repair": 0.677734375
+ },
+ "by_source": {
+  "bird": {
+   "sample0": 0.3177083333333333,
+   "sample0+repair": 0.3463541666666667,
+   "vote@8": 0.4296875,
+   "vote@8+repair": 0.453125
+  },
+  "spider": {
+   "sample0": 0.7109375,
+   "sample0+repair": 0.734375,
+   "vote@8": 0.8359375,
+   "vote@8+repair": 0.8359375
+  }
+ },
+ "repairs_tried": 1204,
+ "repairs_ran": 355,
+ "gen_tokens": 2504234,
+ "tokens_per_question": 4891.08203125,
+ "wall_s": 586.6549332141876,
+ "path": "../models/lora/lora_r2",
+ "ids": "../runs/q2b_A/ids_c1_confirm512.json"
+}

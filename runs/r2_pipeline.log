@@ -1,0 +1,5 @@
+{"questions": 5026, "with_correct": 2349, "samples": 20104, "correct_samples": 6020, "mixed_synsql": 3000, "kept": 5349, "self_examples": 2349, "mean_self_tokens": 429.0225627926777, "pass_at_k": 0.46736967767608434}
+TRAIN_DONE {"changed_tensors": 150, "merged_dir": "/workspace/wsp/models/lora/lora_r2"}
+R2 confirm vote@8+repair = 0.548828125 (v1: 0.53125)
+R2 test done
+R2_ALL_DONE

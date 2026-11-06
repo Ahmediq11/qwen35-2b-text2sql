@@ -1,0 +1,27 @@
+{
+ "train": 5046,
+ "heldout": 303,
+ "heldout_dbs": 116,
+ "trainable_params": 15630336,
+ "micro_batches": 685,
+ "steps": 343,
+ "args": {
+  "data": "data/sft/r2_bird.jsonl",
+  "out": "runs/lora_r2",
+  "epochs": 1.0,
+  "r": 16,
+  "alpha": 32,
+  "lr": 5e-05,
+  "budget": 24000,
+  "accum": 2,
+  "heldout": 300,
+  "eval_every": 150,
+  "seed": 0,
+  "base": "models/lora/lora_synsql10k"
+ },
+ "train_target_tokens": 2927953,
+ "train_total_tokens": 15081502,
+ "changed_tensors": 150,
+ "merged_dir": "/workspace/wsp/models/lora/lora_r2",
+ "train_hours": 0.6937973218493991
+}

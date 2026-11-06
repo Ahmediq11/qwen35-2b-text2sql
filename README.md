@@ -6,7 +6,7 @@ actually moves the needle: **a gradient-free weight edit**, **LoRA distillation*
 This repository tests all three on the same model (Qwen3.5-2B, thinking mode) with the same execution-accuracy
 harness, and reports every result: the ones that worked and the ones that didn't.
 
-**Adapter on Hugging Face:** [Thegame1161/qwen35-2b-text2sql-lora-v1](https://huggingface.co/Thegame1161/qwen35-2b-text2sql-lora-v1)
+**Adapters on Hugging Face:** [v2 (best)](https://huggingface.co/Thegame1161/qwen35-2b-text2sql-lora-v2) · [v1](https://huggingface.co/Thegame1161/qwen35-2b-text2sql-lora-v1)
 
 ## Headline
 
@@ -16,14 +16,16 @@ harness, and reports every result: the ones that worked and the ones that didn't
 | base, thinking (1 sample) | 33.46% | 64.12% | ~9,600 |
 | + weight edit (loop removal) | not run on test sets* | | −28% vs base |
 | LoRA v1 (SynSQL CoT), 1 sample | 25.51% | 60.15% | ~480 |
-| **LoRA v1 + 8 samples + execution repair + vote** | **40.83%** | **68.57%** | **~4,900** |
+| LoRA v1 + 8 samples + execution repair + vote | 40.83% | 68.57% | ~4,900 |
+| LoRA v2 (round 2, self-distilled on BIRD train), 1 sample | 29.09% | 61.41% | ~470 |
+| **LoRA v2 + 8 samples + execution repair + vote** | **42.07%** | **72.44%** | **~4,700** |
 | *reference:* XiYanSQL-QwenCoder-3B (trained on BIRD/Spider) | 52.19% | 85.20% | ~45 |
 
 Execution accuracy (EX), 1,533 BIRD dev and 1,034 Spider dev questions, SQLite, the same prompt for every Qwen run
 (schema DDL + 3 example rows, question, BIRD evidence). *The edit was measured on held-out practice data (below).
 
 **Takeaway:** the best system is a cheap, distilled 2B model that samples 8 short answers, repairs the ones that fail
-to execute, and votes by execution result: **+7.4 points on BIRD dev and +4.5 on Spider dev over the base model, with
+to execute, and votes by execution result: **+8.6 points on BIRD dev and +8.3 on Spider dev over the base model, with
 about half the generated tokens.** Neither the weight edit nor LoRA alone improves accuracy, and the reasons are
 instructive (below).
 
@@ -98,9 +100,20 @@ Because one LoRA answer costs ~1/20 of a base answer, the model can afford sever
 
 The 25-point gap between voting and the oracle shows where the next gain is: a better selector, not more samples.
 
+### 5. Round 2: self-distillation on real BIRD databases
+To close v1's domain gap, the v1 model answered each of 5,026 BIRD *train* questions (discover split) 4 times; for the
+2,349 questions with at least one execution-correct answer, the **shortest correct answer** became a training target
+(plus 3,000 unseen SynSQL rows). A second LoRA was trained on top of v1 (`src/r2_data.py`, 343 steps). The rule for
+touching the test sets was fixed in advance: only if it beats v1 on the confirm split (it did: 54.9% vs 53.1%).
+
+| vote@8 + repair | BIRD dev | Spider dev |
+|---|---|---|
+| base thinking, 1 sample | 33.46% | 64.12% |
+| LoRA v1 | 40.83% | 68.57% |
+| **LoRA v2** | **42.07%** | **72.44%** |
+
 ## What I would do next
-- **Round-2 distillation on in-domain data:** sample the LoRA model on BIRD/Spider *train*, keep only
-  execution-correct answers, and fine-tune again (rejection sampling / self-distillation). *(in progress)*
+- **More rounds / Spider in the loop:** round 2 used BIRD only; adding Spider train and iterating is cheap.
 - **A better selector:** a small verifier, or schema-aware tie-breaking, to close the gap toward the 66% oracle.
 - **Combine** the loop edit with the base model for latency-sensitive use, where its 28% token saving is free.
 
@@ -139,7 +152,7 @@ python src/train_lora.py --data data/sft/synsql_10k.jsonl --out runs/lora_synsql
 python src/vote_repair.py --path models/lora/lora_synsql10k --ids ids.json --dataset bird_dev,spider_dev --n 8 --out results/vote8
 ```
 Data: Spider 1.0 and BIRD (official downloads, checksums in `data/SOURCES.md`), SynSQL-2.5M from Hugging Face.
-Total GPU time for everything in this repository: about 10 GPU-hours on one rented RTX PRO 6000 (~$10).
+Total for everything in this repository: about 16 hours of a rented RTX PRO 6000 (including idle time), roughly $15.
 
 ## Credits
 - Weight-Space Programming: MIT CSAIL, [logs](https://github.com/RikiyaT/lm_understand-logs) and

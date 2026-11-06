@@ -1,0 +1,29 @@
+{
+ "model": "qwen35-2b",
+ "repo": "Qwen/Qwen3.5-2B",
+ "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+ "family": "qwen",
+ "profile": "think",
+ "thinking": true,
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "presence_penalty": 1.5,
+  "max_tokens": 32768,
+  "seed": 0
+ },
+ "edit": "lora:lora_synsql10k",
+ "samples": 4,
+ "dataset": "bird_train",
+ "n_items": 5026,
+ "dtype": "bfloat16",
+ "max_model_len": 40535,
+ "max_prompt_tokens": 7703,
+ "mean_prompt_tokens": 2112.8296856346997,
+ "instruction": "Write one SQLite query that answers the question. Put the final query in a ```sql code block.",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+ "wall_s": 2017.6380224227905,
+ "gen_tokens": 10369664,
+ "tok_per_s": 5139.506633379188
+}
