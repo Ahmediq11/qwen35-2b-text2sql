@@ -1,0 +1,28 @@
+{
+ "model": "qwen35-0.8b-wsp",
+ "repo": "RikiyaT/Qwen3.5-0.8B-weight-space-programming",
+ "revision": "d1671a178705bcab7644806d23c535517f35723b",
+ "family": "qwen",
+ "profile": "nothink",
+ "thinking": false,
+ "sampling": {
+  "temperature": 0.7,
+  "top_p": 0.8,
+  "top_k": 20,
+  "presence_penalty": 1.5,
+  "max_tokens": 4096,
+  "seed": 0
+ },
+ "samples": 2,
+ "dataset": "spider_train,bird_train",
+ "n_items": 50,
+ "dtype": "bfloat16",
+ "max_model_len": 11786,
+ "max_prompt_tokens": 7626,
+ "mean_prompt_tokens": 1592.98,
+ "instruction": "Write one SQLite query that answers the question. Put the final query in a ```sql code block.",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+ "wall_s": 49.32971811294556,
+ "gen_tokens": 11569,
+ "tok_per_s": 234.5239430217615
+}

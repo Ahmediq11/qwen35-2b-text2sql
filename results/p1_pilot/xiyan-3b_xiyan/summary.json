@@ -1,0 +1,51 @@
+{
+ "config": {
+  "model": "xiyan-3b",
+  "profile": "xiyan",
+  "dataset": "spider_train,bird_train",
+  "samples": 2,
+  "sampling": {
+   "temperature": 0.1,
+   "top_p": 0.8,
+   "max_tokens": 1024,
+   "seed": 0
+  },
+  "dtype": "bfloat16"
+ },
+ "gold_errors": 2,
+ "n": 98,
+ "EX": 0.7551020408163265,
+ "cut_share": 0.0,
+ "no_sql": 0.0,
+ "syntax_error": 0.0,
+ "exec_error": 0.02040816326530612,
+ "timeout": 0.0,
+ "wrong_result": 0.22448979591836735,
+ "outcomes": {
+  "correct": 74,
+  "exec_error": 2,
+  "wrong_result": 22
+ },
+ "mean_tokens": 43.03061224489796,
+ "median_tokens": 45,
+ "mean_cut_tail_duplicate8": null,
+ "failure_taxonomy": {
+  "other": 8,
+  "join_logic": 7,
+  "aggregation/grouping": 4,
+  "filter_value": 3,
+  "schema_hallucination": 2
+ },
+ "failure_taxonomy_share": {
+  "other": 0.3333333333333333,
+  "join_logic": 0.2916666666666667,
+  "aggregation/grouping": 0.16666666666666666,
+  "filter_value": 0.125,
+  "schema_hallucination": 0.08333333333333333
+ },
+ "EX_by_difficulty": {
+  "all": 0.7551020408163265
+ },
+ "gpu_hours": 0.004578638606601291,
+ "tok_per_s": 262.7539884499816
+}

@@ -1,0 +1,54 @@
+{
+ "config": {
+  "model": "qwen35-0.8b",
+  "profile": "think",
+  "dataset": "spider_train,bird_train",
+  "samples": 2,
+  "sampling": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20,
+   "presence_penalty": 1.5,
+   "max_tokens": 32768,
+   "seed": 0
+  },
+  "dtype": "bfloat16"
+ },
+ "gold_errors": 0,
+ "n": 40,
+ "EX": 0.2,
+ "cut_share": 0.675,
+ "no_sql": 0.0,
+ "syntax_error": 0.0,
+ "exec_error": 0.025,
+ "timeout": 0.0,
+ "wrong_result": 0.1,
+ "outcomes": {
+  "wrong_result": 4,
+  "cut": 27,
+  "correct": 8,
+  "exec_error": 1
+ },
+ "mean_tokens": 22751.825,
+ "median_tokens": 32768,
+ "mean_cut_tail_duplicate8": 0.8383340609327511,
+ "failure_taxonomy": {
+  "loop/cut": 27,
+  "join_logic": 2,
+  "aggregation/grouping": 1,
+  "schema_hallucination": 1,
+  "filter_value": 1
+ },
+ "failure_taxonomy_share": {
+  "loop/cut": 0.84375,
+  "join_logic": 0.0625,
+  "aggregation/grouping": 0.03125,
+  "schema_hallucination": 0.03125,
+  "filter_value": 0.03125
+ },
+ "EX_by_difficulty": {
+  "all": 0.2
+ },
+ "gpu_hours": 0.08852952195538415,
+ "tok_per_s": 2855.522654724795
+}

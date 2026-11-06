@@ -41,3 +41,26 @@ and finished without `\boxed{}` (7). So, as in the paper, the edit mostly lets t
 correct answers get longer (median 4,247 → 8,370 tokens) because the model now finishes long reasoning it used to
 abandon in a loop. GPU time 0.28 h (11.4 min base, 5.5 min edited).
 Next: GATE 0 passes; Phase 1 (SQL harness and baselines).
+
+## 2026-11-06 · Phase 1.1 — Data and harness
+We downloaded Spider 1.0 (Yale page → Google Drive), BIRD mini-dev and BIRD train (the official aliyuncs links) on the
+GPU box. Sizes and sha256 are recorded in `data/SOURCES.md`. The counts match the official ones: Spider dev 1,034 /
+train 8,659, BIRD mini-dev 500 over 11 DBs, BIRD train 9,428 over 69 DBs. The harness is `src/data.py` (loaders, DDL +
+3 sample rows schema text, practice splits), `src/prompts.py` (one Qwen prompt; XiYan's own template copied verbatim
+from its model card), `src/generate.py` (vLLM, pinned model revisions, Qwen model-card sampling profiles),
+`src/sql_eval.py` (extraction + execution accuracy) and `src/failures.py` (rule-based taxonomy). 44 unit tests pass, 34
+of them on the scorer. In the gold self-check, every gold query scored against itself is correct, except 2 slow BIRD
+mini-dev gold queries (gold timeout raised to 300 s) and a few broken practice gold queries, which are excluded as
+`gold_error`. Practice data is split by database into `discover` (8,960) and `confirm` (9,127).
+
+## 2026-11-06 · Phase 1.2 — Pilot on practice data (discover split, no test items)
+We ran all 7 configurations on 50 practice questions (thinking off) or 20 (thinking on), 2 samples each. The pilot
+caught a scoring bug. With thinking on, Qwen's chat template opens `<think>` in the prompt, so a cut answer has no tag in
+its text, and the first scorer read SQL out of the unfinished reasoning. Fixed (thinking on + no `</think>` = cut),
+with a test, and rescored. Pilot EX (small samples, practice data): 0.8B off 21%, 0.8B+edit off 17%, 2B off 43%, XiYan
+76% (XiYan was probably trained on Spider/BIRD train, so its practice numbers are inflated), 0.8B on 20% with **68% cut**,
+0.8B+edit on 39% with **0% cut**, 2B on 66% with 5% cut. With thinking off, most 0.8B failures are made-up
+columns/tables (`schema_hallucination`). With thinking on, 27 of 32 base 0.8B failures are `loop/cut`, and the MIT
+edit removes them: the math edit transfers to SQL. A full-matrix estimate is several GPU-hours, mostly the base 0.8B
+thinking run (answers average 22.8k tokens because it loops to the limit).
+Next: ask the user before the full matrix (> 3 GPU-hours).

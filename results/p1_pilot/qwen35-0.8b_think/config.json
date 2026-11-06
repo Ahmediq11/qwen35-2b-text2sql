@@ -1,0 +1,28 @@
+{
+ "model": "qwen35-0.8b",
+ "repo": "Qwen/Qwen3.5-0.8B",
+ "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+ "family": "qwen",
+ "profile": "think",
+ "thinking": true,
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "presence_penalty": 1.5,
+  "max_tokens": 32768,
+  "seed": 0
+ },
+ "samples": 2,
+ "dataset": "spider_train,bird_train",
+ "n_items": 20,
+ "dtype": "bfloat16",
+ "max_model_len": 35407,
+ "max_prompt_tokens": 2575,
+ "mean_prompt_tokens": 1328.05,
+ "instruction": "Write one SQLite query that answers the question. Put the final query in a ```sql code block.",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+ "wall_s": 318.70627903938293,
+ "gen_tokens": 910073,
+ "tok_per_s": 2855.522654724795
+}

@@ -1,0 +1,57 @@
+{
+ "config": {
+  "model": "qwen35-0.8b-wsp",
+  "profile": "nothink",
+  "dataset": "spider_train,bird_train",
+  "samples": 2,
+  "sampling": {
+   "temperature": 0.7,
+   "top_p": 0.8,
+   "top_k": 20,
+   "presence_penalty": 1.5,
+   "max_tokens": 4096,
+   "seed": 0
+  },
+  "dtype": "bfloat16"
+ },
+ "gold_errors": 2,
+ "n": 98,
+ "EX": 0.17346938775510204,
+ "cut_share": 0.01020408163265306,
+ "no_sql": 0.0,
+ "syntax_error": 0.05102040816326531,
+ "exec_error": 0.5,
+ "timeout": 0.01020408163265306,
+ "wrong_result": 0.2755102040816326,
+ "outcomes": {
+  "exec_error": 48,
+  "wrong_result": 27,
+  "correct": 17,
+  "syntax_error": 5,
+  "timeout": 1
+ },
+ "mean_tokens": 113.45918367346938,
+ "median_tokens": 50,
+ "mean_cut_tail_duplicate8": 0.2736156351791531,
+ "failure_taxonomy": {
+  "schema_hallucination": 45,
+  "join_logic": 15,
+  "other": 9,
+  "aggregation/grouping": 6,
+  "filter_value": 5,
+  "no_sql/format": 1
+ },
+ "failure_taxonomy_share": {
+  "schema_hallucination": 0.5555555555555556,
+  "join_logic": 0.18518518518518517,
+  "other": 0.1111111111111111,
+  "aggregation/grouping": 0.07407407407407407,
+  "filter_value": 0.06172839506172839,
+  "no_sql/format": 0.012345679012345678
+ },
+ "EX_by_difficulty": {
+  "all": 0.17346938775510204
+ },
+ "gpu_hours": 0.01370269947581821,
+ "tok_per_s": 234.5239430217615
+}
