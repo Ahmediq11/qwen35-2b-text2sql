@@ -71,8 +71,10 @@ text = tok.apply_chat_template([{"role": "user", "content": prompt}], tokenize=F
                                add_generation_prompt=True, enable_thinking=True)
 ```
 Sampling used in the results: temperature 0.6, top_p 0.95, top_k 20, presence_penalty 1.5. For the full
-sample → execute → repair → vote loop, and the exact prompt builder, see the GitHub project (`src/vote_repair.py`,
+sample → execute → repair → vote loop, and the exact prompt builder, see the [GitHub project](https://github.com/Ahmediq11/qwen35-2b-text2sql) (`src/vote_repair.py`,
 `src/prompts.py`). For fast serving, merge the adapter and load the merged weights in vLLM.
+
+Code, logs and every experiment: [github.com/Ahmediq11/qwen35-2b-text2sql](https://github.com/Ahmediq11/qwen35-2b-text2sql).
 
 ## Credits
 Base model: Qwen3.5 (Apache-2.0). Data: SynSQL-2.5M / OmniSQL (Apache-2.0, [paper](https://arxiv.org/abs/2503.02240)).

@@ -67,6 +67,8 @@ Prompt (user message): the schema as `CREATE TABLE` statements with 3 example ro
 `Question: …`, `Evidence: …` (if any), and `Write one SQLite query that answers the question. Put the final query in a
 ```sql code block.` Use `enable_thinking=True`; sampling temperature 0.6, top_p 0.95, top_k 20, presence_penalty 1.5.
 
+Code, logs and every experiment: [github.com/Ahmediq11/qwen35-2b-text2sql](https://github.com/Ahmediq11/qwen35-2b-text2sql).
+
 ## Credits
 Base model: Qwen3.5 (Apache-2.0). Data: SynSQL-2.5M / OmniSQL (Apache-2.0, [paper](https://arxiv.org/abs/2503.02240)),
 BIRD train questions and databases ([BIRD](https://bird-bench.github.io/)). Benchmarks: BIRD, [Spider](https://yale-lily.github.io/spider).
