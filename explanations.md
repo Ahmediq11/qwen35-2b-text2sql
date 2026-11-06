@@ -124,3 +124,16 @@ Kept only SQL that runs within 5 s and returns ≥ 1 row (21,011 dropped). Decon
 mini-dev: 0 question matches, 0 shared database names. Mean prompt 2,927 tokens, mean target 705 tokens.
 First run: 10k examples, LoRA r=16/α=32 on q/k/v/o, linear-attention in/out projections and MLP of all 24 layers
 (15.6M trainable params), lr 1e-4 cosine, 1 epoch; measured 3.5k tokens/s → ~2.8 GPU-hours.
+
+## 2026-11-06 · Phase 4.2 — LoRA SFT v1 on 10k SynSQL CoT (negative on BIRD)
+Training: 9,699 examples, 795 steps, 1.6 GPU-hours (~6k tok/s), held-out loss 0.467 → 0.301 (held-out = 175 other
+synthetic DBs), 15.6M trainable params, merged into 186 tensors (`models/lora/lora_synsql10k`).
+- Confirm split (512, paired with the base run): EX 47.9% → **40.8%** (−7.0 ± 2.2; 46 rescues / 82 losses). BIRD
+  train part 39.8% → 29.9%, Spider train part 71.9% → 73.4%. Mean answer 7,198 → **484 tokens** (15× shorter), 0 cut.
+- Locked tests, run once: BIRD dev **26.94%** (base thinking 33.46%, base no-thinking 22.24%), Spider dev 59.67%
+  (base thinking 64.12%).
+- Why: the short SynSQL-style reasoning does not check BIRD's messy real schemas; most new failures are
+  execution errors from invented columns ("no such column: s.state"); exec_error 22% of answers. SynSQL schemas are
+  clean and synthetic, BIRD columns have spaces/odd names and evidence-dependent values: a distribution gap.
+Next ideas: execution-error feedback + execution-vote over several cheap samples (the LoRA model is 15–20× cheaper per
+answer); a rejection-sampling round on BIRD/Spider train (keep execution-correct samples) to close the domain gap.

@@ -1,0 +1,26 @@
+{
+ "train": 9699,
+ "heldout": 301,
+ "heldout_dbs": 175,
+ "trainable_params": 15630336,
+ "micro_batches": 1589,
+ "steps": 795,
+ "args": {
+  "data": "data/sft/synsql_10k.jsonl",
+  "out": "runs/lora_synsql10k",
+  "epochs": 1.0,
+  "r": 16,
+  "alpha": 32,
+  "lr": 0.0001,
+  "budget": 24000,
+  "accum": 2,
+  "heldout": 300,
+  "eval_every": 150,
+  "seed": 0
+ },
+ "train_target_tokens": 6772223,
+ "train_total_tokens": 34958406,
+ "changed_tensors": 186,
+ "merged_dir": "/workspace/wsp/models/lora/lora_synsql10k",
+ "train_hours": 1.6844014989005194
+}
