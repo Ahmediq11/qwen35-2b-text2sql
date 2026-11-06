@@ -5,3 +5,4 @@ data/*/
 *.safetensors
 __pycache__/
 results/p1q_qwen2b/qwen35-2b_think_bird_dev_spider_dev/*.jsonl
+runs/q2b_A/gen/*/per_item.jsonl

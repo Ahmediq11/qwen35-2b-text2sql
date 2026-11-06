@@ -49,13 +49,15 @@ def main():
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--mem", type=float, default=0.90)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--path", help="override the model dir (an edited checkpoint built by fwd_tool.py)")
+    ap.add_argument("--edit", help="edit dir recorded in config.json when --path is an edited checkpoint")
     a = ap.parse_args()
 
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
 
     path, family, repo, rev = MODELS[a.model]
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path)   # relative to project root
+    path = a.path or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path)   # project root
     prof = PROFILES[a.profile]
     items = [it for name in a.dataset.split(",") for it in D.load(a.data_root, name)]
     if a.ids:
@@ -72,7 +74,7 @@ def main():
     max_len = max(n_prompt) + sampling["max_tokens"] + 64
     os.makedirs(a.out, exist_ok=True)
     cfg = {"model": a.model, "repo": repo, "revision": rev, "family": family, "profile": a.profile,
-           "thinking": prof["thinking"], "sampling": sampling, "samples": a.samples, "dataset": a.dataset,
+           "thinking": prof["thinking"], "sampling": sampling, "edit": a.edit, "samples": a.samples, "dataset": a.dataset,
            "n_items": len(items), "dtype": a.dtype, "max_model_len": max_len, "max_prompt_tokens": max(n_prompt),
            "mean_prompt_tokens": sum(n_prompt) / len(n_prompt), "instruction": P.INSTRUCTION,
            "gpu": subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"], capture_output=True,

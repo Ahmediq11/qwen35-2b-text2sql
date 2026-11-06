@@ -78,3 +78,26 @@ tuning split 36.91%. **211 of 1,035 tuning items (20%) are cut at 32,768 tokens;
 above the PLAN's 30% threshold for Track A (loops). Mean answer length 9.6k tokens. GPU time: 0.02 h off, 1.09 h on.
 Next (GATE 1): Track A on 2B thinking — test the MIT-style edit recipe for a 2B repetition direction; LoRA distillation
 as the comparison.
+
+## 2026-11-06 · Phase 2–3 · Track A on Qwen3.5-2B (thinking on) — passes 1–8 of 50
+Tool: `src/fwd_tool.py` (budget in `runs/q2b_A/budget.json`; `generate` ≤512 problems, `read` ≤1,024 texts). CPU
+analysis: `src/contrast.py` (contrast texts), `src/edit_build.py` (directions, writer neurons, edits, random control).
+- Pass 1, original, 512 discover practice items: EX 50.1%, 10.2% cut (45 of 50 cuts on BIRD train).
+- Contrast: from each of the 50 cut answers, a productive span just before the loop onset (word 8-gram duplicate
+  test) and a repetitive span inside the loop; plus 64 mid-thinking spans of finished-correct answers. Fit/held split
+  by problem.
+- Pass 2, read: direction u_L = mean(loop) − mean(pre_loop). Held-out AUC ≥ 0.94 from layer 2 on, ≈1.0 for layers
+  10–23 (vs finished answers: 1.000). Layers 15 and 19 chosen as in p50c (both models have 24 layers).
+- Passes 3–5, dose (held split, Δ log-prob nats/token, loop / pre_loop / finished): α=2: −0.002/−0.006/+0.000;
+  α=6: −0.030/−0.027/−0.005; norm-matched orthogonal random control at α=6: +0.001/+0.000/−0.001. Selective against
+  finished reasoning, not against the pre-loop span (which often already starts repeating).
+- Passes 6–8, paired generation, 256 fresh BIRD discover items, 1 sample: original EX 40.6%, cut 16.8%, 8,251 mean
+  tokens; α=6 (rel. change 5–6%) EX 40.7%, cut 4.1%, 5,863 tokens, 18 rescues / 19 losses (gain −0.4 ± 2.5);
+  α=12 (10–12%, p50c-sized) EX 41.2%, cut 5.4%, 29/29 (±3.2).
+- Mechanism: the edit removes the loops (cut 16.8% → 4–5%, thinking closes in 95–96%), but the answers that used to
+  loop now finish **wrong**: only 4 (α=6) / 9 (α=12) of ~38 scorable formerly-cut items become correct. In SQL the loop
+  is a symptom of a question the model cannot solve, not a block in front of an answer it already knows (as in GSM8K,
+  where 576/579 rescues were formerly-cut answers). Accuracy on formerly-finished items moves 48.8% → 46.3% / 44.3%
+  (within sampling noise of one sample, but in the wrong direction). Practical upside of α=6: same accuracy with 29%
+  fewer generated tokens and 4× fewer cut-offs.
+Next: GATE decision (freeze α=6 as an efficiency edit and confirm, and/or go to Phase 4 LoRA distillation).
