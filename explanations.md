@@ -137,3 +137,19 @@ synthetic DBs), 15.6M trainable params, merged into 186 tensors (`models/lora/lo
   clean and synthetic, BIRD columns have spaces/odd names and evidence-dependent values: a distribution gap.
 Next ideas: execution-error feedback + execution-vote over several cheap samples (the LoRA model is 15–20× cheaper per
 answer); a rejection-sampling round on BIRD/Spider train (keep execution-correct samples) to close the domain gap.
+
+## 2026-11-06 · Phase 4.3 — Cheap model × inference-time scaling (LoRA v1 + 8 samples + execution repair + vote)
+`src/vote_repair.py`: 8 samples per question; every sample whose SQL fails (or has none) gets one repair turn with the
+SQLite error message; the samples that run are grouped by result and the largest group wins. Gold is used only for
+scoring. Confirm split, 512 questions, LoRA v1 model:
+| method | EX | BIRD part | Spider part | tokens/question |
+|---|---|---|---|---|
+| base 2B thinking, 1 sample (reference) | 47.9% | 39.8% | 71.9% | 7,198 |
+| LoRA, sample 0 | 38.5% | 28.9% | 67.2% | ~480 |
+| LoRA, sample 0 + repair | 43.9% | 34.6% | 71.9% | — |
+| LoRA, vote@8 | 50.0% | 38.5% | 84.4% | — |
+| **LoRA, vote@8 + repair** | **53.1%** | **43.0%** | 83.6% | **5,152** |
+| oracle pass@8 + repair | 66.2% | | | |
+Paired with the base run: vote@8 +2.1 ± 2.0; **vote@8 + repair +5.3 ± 2.1 (71 rescues / 44 losses)** while using 28%
+fewer generated tokens than one base thinking answer. Repair: 1,350 tried, 419 ran. The 13-point gap to the oracle says
+a better selector (not more samples) is the next lever. Locked test sets not run for this method yet.
